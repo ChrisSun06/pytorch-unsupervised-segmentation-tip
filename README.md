@@ -27,11 +27,11 @@ pytorch, opencv2, tqdm
 
 ### Vanilla
 
-    $ python demo.py --input ./BSD500/101027.jpg
+    $ python find_plant.py --input 0184_BP_H_-1_A_211_1595085939000_compressed.JPG
 
 ### Vanilla + scribbles
 
-    $ python demo.py --input ./PASCAL_VOC_2012/2007_001774.jpg --scribble
+    $ python find_plant.py --input 0184_BP_H_-1_A_211_1595085939000_compressed.JPG --scribble
 
 ### Vanilla + reference image(s)
 

@@ -19,7 +19,7 @@ parser.add_argument('--scribble', action='store_true', default=False,
                     help='use scribbles')
 parser.add_argument('--nChannel', metavar='N', default=100, type=int, 
                     help='number of channels')
-parser.add_argument('--maxIter', metavar='T', default=1000, type=int, 
+parser.add_argument('--maxIter', metavar='T', default=600, type=int, 
                     help='number of maximum iterations')
 parser.add_argument('--minLabels', metavar='minL', default=3, type=int, 
                     help='minimum number of labels')
@@ -90,7 +90,7 @@ if args.scribble:
         target_scr = target_scr.cuda()
     target_scr = Variable( target_scr )
     # set minLabels
-    args.minLabels = len(mask_inds)
+    # args.minLabels = len(mask_inds)
 
 # train
 model = MyNet( data.size(1) )
@@ -135,8 +135,8 @@ for batch_idx in range(args.maxIter):
     if args.visualize:
         im_target_rgb = np.array([label_colours[ c % args.nChannel ] for c in im_target])
         im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
-        cv2.imshow( "output", im_target_rgb )
-        cv2.waitKey(10)
+        # cv2.imshow( "output", im_target_rgb )
+        # cv2.waitKey(10)
 
     # loss 
     if args.scribble:
@@ -153,7 +153,7 @@ for batch_idx in range(args.maxIter):
         print ("nLabels", nLabels, "reached minLabels", args.minLabels, ".")
         break
 
-THRESH = 12
+THRESH = 9
 GREEN_LOWER = [25, 50, 20] # [45, 50, 20]
 GREEN_UPPER = [85, 255, 255]
 
@@ -167,6 +167,7 @@ def find_plant(im, im_target):
         mask = np.where(reshaped_im_target==x)
         masked_image = image_data[mask[0], mask[1]]
         green_percent = process_green(masked_image, len(mask[0]))
+        print(green_percent)
         if green_percent > THRESH:
             mapped[x] = None   # np.array([173,255,47])
         else:

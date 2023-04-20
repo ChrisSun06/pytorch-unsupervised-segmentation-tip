@@ -19,7 +19,7 @@ parser.add_argument('--scribble', action='store_true', default=False,
                     help='use scribbles')
 parser.add_argument('--nChannel', metavar='N', default=100, type=int, 
                     help='number of channels')
-parser.add_argument('--maxIter', metavar='T', default=600, type=int, 
+parser.add_argument('--maxIter', metavar='T', default=1000, type=int, 
                     help='number of maximum iterations')
 parser.add_argument('--minLabels', metavar='minL', default=3, type=int, 
                     help='minimum number of labels')
@@ -156,6 +156,8 @@ for batch_idx in range(args.maxIter):
 # THRESH = 12
 GREEN_LOWER = [0, 150, 0] # [45, 50, 20]
 GREEN_UPPER = [150, 255, 150]
+GREEN_BASE = [0, 150, 0]
+NORM = 300
 
 def find_plant(im, im_target):
     image_data = np.array([im])[0]
@@ -173,7 +175,7 @@ def find_plant(im, im_target):
         #     continue
         masked_image = image_data[mask[0], mask[1]]
         green_percent = process_green(masked_image, len(mask[0]))
-        if green_percent == 0:
+        if green_percent < 3:
             mapped[x] = [255,255,255]
         else:
             mapped[x] = None
@@ -204,6 +206,10 @@ def process_green(img, count):
 ))
     green_pixel_count = np.count_nonzero(green_mask)
     return int(green_pixel_count / count * 100)
+    # norm_mask = np.linalg.norm(img - np.array(GREEN_BASE), axis=1) <= NORM
+    # norm_pixel_count = np.count_nonzero(norm_mask)
+    # return int(norm_pixel_count / count * 100)
+    
 
 # find plant vs. non-plant
 find_plant(im, im_target)

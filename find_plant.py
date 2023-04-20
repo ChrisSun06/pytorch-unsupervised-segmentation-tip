@@ -154,23 +154,38 @@ for batch_idx in range(args.maxIter):
         break
 
 THRESH = 12
-GREEN_LOWER = [25, 50, 20] # [45, 50, 20]
-GREEN_UPPER = [85, 255, 255]
+GREEN_LOWER = [0, 150, 0] # [45, 50, 20]
+GREEN_UPPER = [150, 255, 150]
 
 def find_plant(im, im_target):
     image_data = np.array([im])[0]
     reshaped_image_data = image_data.reshape((im_target.shape[0], 3))
     reshaped_im_target = im_target.reshape((im.shape[0], im.shape[1]))
-    mapped = {}
+    mapped = {} # map from label to color
+    percent_mapped = {} # map from label to green percentage
     labels = np.unique(im_target)
     for x in labels:
         mask = np.where(reshaped_im_target==x)
+        # number of pixels in the label
+        # count = len(mask[0])
+        # if count < 0.05 * im_target.shape[0]:
+        #     mapped[x] = [255,255,255]
+        #     continue
         masked_image = image_data[mask[0], mask[1]]
         green_percent = process_green(masked_image, len(mask[0]))
-        if green_percent > THRESH:
-            mapped[x] = None   # np.array([173,255,47])
-        else:
+        if green_percent == 0:
             mapped[x] = [255,255,255]
+        else:
+            mapped[x] = None
+            percent_mapped[x] = green_percent
+        # if green_percent > THRESH:
+        #     mapped[x] = None   # np.array([173,255,47])
+        # else:
+        #     mapped[x] = [255,255,255]
+    # remove the classes with the lowest green percentage
+    sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
+    mapped[sorted_percent_mapped[0][0]] = [255,255,255]
+
     im_target = target.data.cpu().numpy()
     im_target_rgb = np.array([mapped[c] if mapped[c] is not None else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])
     im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )

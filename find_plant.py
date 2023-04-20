@@ -184,7 +184,8 @@ def find_plant(im, im_target):
         #     mapped[x] = [255,255,255]
     # remove the classes with the lowest green percentage
     sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
-    mapped[sorted_percent_mapped[0][0]] = [255,255,255]
+    # mapped[sorted_percent_mapped[0][0]] = [255,255,255]
+    print(sorted_percent_mapped)
 
     im_target = target.data.cpu().numpy()
     im_target_rgb = np.array([mapped[c] if mapped[c] is not None else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])

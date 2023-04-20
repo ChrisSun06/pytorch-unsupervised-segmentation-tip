@@ -19,7 +19,7 @@ parser.add_argument('--scribble', action='store_true', default=False,
                     help='use scribbles')
 parser.add_argument('--nChannel', metavar='N', default=100, type=int, 
                     help='number of channels')
-parser.add_argument('--maxIter', metavar='T', default=1000, type=int, 
+parser.add_argument('--maxIter', metavar='T', default=600, type=int, 
                     help='number of maximum iterations')
 parser.add_argument('--minLabels', metavar='minL', default=3, type=int, 
                     help='minimum number of labels')
@@ -90,7 +90,7 @@ if args.scribble:
         target_scr = target_scr.cuda()
     target_scr = Variable( target_scr )
     # set minLabels
-    args.minLabels = len(mask_inds)
+    # args.minLabels = len(mask_inds)
 
 # train
 model = MyNet( data.size(1) )
@@ -135,8 +135,8 @@ for batch_idx in range(args.maxIter):
     if args.visualize:
         im_target_rgb = np.array([label_colours[ c % args.nChannel ] for c in im_target])
         im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
-        cv2.imshow( "output", im_target_rgb )
-        cv2.waitKey(10)
+        # cv2.imshow( "output", im_target_rgb )
+        # cv2.waitKey(10)
 
     # loss 
     if args.scribble:
@@ -153,7 +153,7 @@ for batch_idx in range(args.maxIter):
         print ("nLabels", nLabels, "reached minLabels", args.minLabels, ".")
         break
 
-THRESH = 12
+# THRESH = 12
 GREEN_LOWER = [0, 150, 0] # [45, 50, 20]
 GREEN_UPPER = [150, 255, 150]
 

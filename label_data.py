@@ -34,23 +34,19 @@ parser.add_argument('--nConv', metavar='M', default=2, type=int,
                     help='number of convolutional layers')
 parser.add_argument('--visualize', metavar='1 or 0', default=1, type=int, 
                     help='visualization flag')
-parser.add_argument('--input', metavar='FILENAME',
-                    help='input image file name', required=True)
 parser.add_argument('--stepsize_sim', metavar='SIM', default=1, type=float,
                     help='step size for similarity loss', required=False)
-parser.add_argument('--stepsize_con', metavar='CON', default=1, type=float, 
+parser.add_argument('--stepsize_con', metavar='CON', default=1.5, type=float, 
                     help='step size for continuity loss')
 parser.add_argument('--stepsize_scr', metavar='SCR', default=0.5, type=float, 
                     help='step size for scribble loss')
-parser.add_argument('--stepsize_scr', metavar='SCR', default=0.5, type=float, 
-                    help='step size for scribble loss')
-args = parser.parse_args('--image_src', metavar="IMG_SRC", default="sh_1k_data/images/train", type=str, 
+parser.add_argument('--image_src', metavar="IMG_SRC", default="sh_1k_data/images/train", type=str, 
                         help="image folder for images to be segmented")
-args = parser.parse_args('--image_dst', metavar="IMG_DST", default="sh_1k_data/segmented_plants/train", type=str, 
+parser.add_argument('--image_dst', metavar="IMG_DST", default="sh_1k_data/segmented_plants/train", type=str, 
                         help="image dst folder for segmented images")
-args = parser.parse_args('--seg_dst', metavar="SEG_DST", default="sh_1k_data/segmented_images/train", type=str, 
+parser.add_argument('--seg_dst', metavar="SEG_DST", default="sh_1k_data/segmented_images/train", type=str, 
                         help="image dst folder for segmented images")
-
+args = parser.parse_args()
 
 # CNN model
 class MyNet(nn.Module):
@@ -213,8 +209,8 @@ def segment(input):
         if nLabels <= args.minLabels:
             print ("nLabels", nLabels, "reached minLabels", args.minLabels, ".")
             break
-    save(model, data, label_colours, img_name)
-    find_plant(im, im_target, target, img_name, im)
+    save(model, data, label_colours, im, img_name)
+    find_plant(im, im_target, target, img_name)
 
 
     
@@ -224,4 +220,4 @@ def segment(input):
 
 if __name__ == "__main__":
     for img in tqdm(os.listdir(args.image_src)):
-        segment(img)
+      segment(os.path.join(args.image_src,img))

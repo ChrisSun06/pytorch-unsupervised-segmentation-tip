@@ -42,9 +42,9 @@ parser.add_argument('--stepsize_scr', metavar='SCR', default=0.5, type=float,
                     help='step size for scribble loss')
 parser.add_argument('--image_src', metavar="IMG_SRC", default="sh_1k_data/images/train", type=str, 
                         help="image folder for images to be segmented")
-parser.add_argument('--image_dst', metavar="IMG_DST", default="sh_1k_data/segmented_plants/train", type=str, 
+parser.add_argument('--image_dst', metavar="IMG_DST", default="sh_1k_data/segmented_plants/train/", type=str, 
                         help="image dst folder for segmented images")
-parser.add_argument('--seg_dst', metavar="SEG_DST", default="sh_1k_data/segmented_images/train", type=str, 
+parser.add_argument('--seg_dst', metavar="SEG_DST", default="sh_1k_data/segmented_images/train/", type=str, 
                         help="image dst folder for segmented images")
 args = parser.parse_args()
 
@@ -126,6 +126,10 @@ def save(model, data, label_colours, im, img_name):
 def segment(input):
     # load image
     img_name = input.split("/")[-1]
+    # segment plant save path
+    save_path = args.image_dst + img_name
+    if os.path.exists(save_path):
+        return
     im = cv2.imread(input)
     data = torch.from_numpy( np.array([im.transpose( (2, 0, 1) ).astype('float32')/255.]) ) 
     if use_cuda:

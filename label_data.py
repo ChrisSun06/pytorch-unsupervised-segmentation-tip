@@ -74,13 +74,14 @@ class MyNet(nn.Module):
         x = self.bn3(x)
         return x
 
-def find_plant(im, im_target, target, img_name):
+def find_plant(im, im_target, target, img_name, model, data, label_colours):
     image_data = np.array([im])[0]
     reshaped_image_data = image_data.reshape((im_target.shape[0], 3))
     reshaped_im_target = im_target.reshape((im.shape[0], im.shape[1]))
     mapped = {} # map from label to color
     percent_mapped = {} # map from label to green percentage
     labels = np.unique(im_target)
+    all_white = True
     for x in labels:
         mask = np.where(reshaped_im_target==x)
         masked_image = image_data[mask[0], mask[1]]
@@ -89,16 +90,21 @@ def find_plant(im, im_target, target, img_name):
             mapped[x] = [255,255,255]
         else:
             mapped[x] = None
+            all_white = False
             percent_mapped[x] = green_percent
     # remove the classes with the lowest green percentage
-    sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
+    # sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
     # mapped[sorted_percent_mapped[0][0]] = [255,255,255]
-    print(sorted_percent_mapped)
-
-    im_target = target.data.cpu().numpy()
-    im_target_rgb = np.array([mapped[c] if mapped[c] is not None else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])
-    im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
-    cv2.imwrite( args.image_dst + img_name, im_target_rgb )
+    # print(sorted_percent_mapped)
+    if all_white:
+        with open("all_white.txt", "a") as f:
+            f.write(img_name + "\n")
+    else:
+        save(model, data, label_colours, im, img_name)
+        im_target = target.data.cpu().numpy()
+        im_target_rgb = np.array([mapped[c] if mapped[c] is not None else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])
+        im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
+        cv2.imwrite( args.image_dst + img_name, im_target_rgb )
 
 
 def process_green(img, count):
@@ -213,8 +219,7 @@ def segment(input):
         if nLabels <= args.minLabels:
             print ("nLabels", nLabels, "reached minLabels", args.minLabels, ".")
             break
-    save(model, data, label_colours, im, img_name)
-    find_plant(im, im_target, target, img_name)
+    find_plant(im, im_target, target, img_name, model)
 
 
     

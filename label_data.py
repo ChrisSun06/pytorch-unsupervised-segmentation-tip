@@ -96,6 +96,7 @@ def find_plant(im, im_target, target, img_name, model, data, label_colours):
     # sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
     # mapped[sorted_percent_mapped[0][0]] = [255,255,255]
     # print(sorted_percent_mapped)
+    
     if all_white:
         with open("all_white.txt", "a") as f:
             f.write(img_name + "\n")

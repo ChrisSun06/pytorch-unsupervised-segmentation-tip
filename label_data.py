@@ -40,11 +40,11 @@ parser.add_argument('--stepsize_con', metavar='CON', default=1.5, type=float,
                     help='step size for continuity loss')
 parser.add_argument('--stepsize_scr', metavar='SCR', default=0.5, type=float, 
                     help='step size for scribble loss')
-parser.add_argument('--image_src', metavar="IMG_SRC", default="sh_1k_data/images/train", type=str, 
+parser.add_argument('--image_src', metavar="IMG_SRC", default="sh_1k_data/images/val", type=str, 
                         help="image folder for images to be segmented")
-parser.add_argument('--image_dst', metavar="IMG_DST", default="sh_1k_data/segmented_plants/train2/", type=str, 
+parser.add_argument('--image_dst', metavar="IMG_DST", default="sh_1k_data/segmented_plants/val2/", type=str, 
                         help="image dst folder for segmented images")
-parser.add_argument('--seg_dst', metavar="SEG_DST", default="sh_1k_data/segmented_images/train2/", type=str, 
+parser.add_argument('--seg_dst', metavar="SEG_DST", default="sh_1k_data/segmented_images/val2/", type=str, 
                         help="image dst folder for segmented images")
 args = parser.parse_args()
 
@@ -99,7 +99,7 @@ def find_plant(im, im_target, target, img_name, model, data, label_colours):
     # print(sorted_percent_mapped)
     
     if all_white:
-        with open("all_white.txt", "a") as f:
+        with open("all_white_val.txt", "a") as f:
             f.write(img_name + "\n")
     else:
         save(model, data, label_colours, im, img_name)

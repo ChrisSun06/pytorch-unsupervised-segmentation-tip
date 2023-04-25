@@ -135,7 +135,7 @@ def segment(input):
     # load image
     img_name = input.split("/")[-1]
     # segment plant save path
-    save_path = "sh_1k_data/segmented_plants/train/" + img_name
+    save_path = "sh_1k_data/segmented_plants/val/" + img_name
     if os.path.exists(save_path):
         return
     im = cv2.imread(input)

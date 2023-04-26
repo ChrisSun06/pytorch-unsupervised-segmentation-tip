@@ -10,6 +10,7 @@ import numpy as np
 import torch.nn.init
 from tqdm import tqdm
 import os
+from scipy.ndimage import convolve
 
 use_cuda = torch.cuda.is_available()
 
@@ -105,8 +106,23 @@ def find_plant(im, im_target, target, img_name, model, data, label_colours):
         save(model, data, label_colours, im, img_name)
         im_target = target.data.cpu().numpy()
         im_target_rgb = np.array([mapped[c] if mapped[c] is not None else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])
+        process_image(im_target_rgb.reshape( im.shape ), im)
         im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
         cv2.imwrite( args.image_dst + img_name, im_target_rgb )
+
+def process_image(image, im):
+    kernel = np.ones((10, 10))
+    binary_image = np.all(image == [255,255,255], axis=-1).astype(int)
+    convolved_image = convolve(binary_image, kernel)
+    white_pixels = np.argwhere(np.all(image == [255,255,255], axis=-1))
+    print("image", image.shape)
+    print("im", np.array([im])[0].shape)
+    for pixel in white_pixels:
+        row, col = pixel
+        if convolved_image[row, col] < np.sum(kernel):
+            image[row, col] = np.array([im])[0][row][col]
+
+    return image
 
 
 def process_green(img, count):
@@ -135,7 +151,7 @@ def segment(input):
     # load image
     img_name = input.split("/")[-1]
     # segment plant save path
-    save_path = "sh_1k_data/segmented_plants/val/" + img_name
+    save_path = "sh_1k_data/segmented_plants/val2/" + img_name
     if os.path.exists(save_path):
         return
     im = cv2.imread(input)

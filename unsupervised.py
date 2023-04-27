@@ -163,14 +163,24 @@ if not args.visualize:
     im_target_rgb = im_target_rgb.reshape(im.shape).astype(np.uint8)
 # cv2.imwrite("output.png", im_target_rgb)
 
-unique_labels = np.unique(im_target)
+GREEN_LOWER = np.array([0, 150, 0])
+GREEN_UPPER = np.array([150, 255, 150])
+
+unique_labels, pixel_counts = np.unique(im_target, return_counts=True)
 label_positions = im_target.reshape(im.shape[:2])
+non_green_labels = list()
 for i, label in enumerate(unique_labels):
-    non_label_area = np.copy(im)
-    non_label_area[label_positions != label] = 255
-    cv2.imwrite("label" + str(i) + ".png", non_label_area)
+    label_area = np.copy(im)
+    label_area[label_positions != label] = 255
+    cv2.imwrite("label" + str(i) + ".png", label_area)
+    green_area = cv2.inRange(label_area, GREEN_LOWER, GREEN_UPPER)
+    num_green_pixel = np.count_nonzero(green_area)
+    green_pixel_ratio = num_green_pixel / pixel_counts[i]
+    print(i, num_green_pixel, pixel_counts[i], green_pixel_ratio)
+    if green_pixel_ratio < 0.1:
+        non_green_labels.append(label)
 
 plant_area = np.copy(im)
-for i in (1, 2, 3, 4, 5):
-    plant_area[label_positions == unique_labels[i]] = 255
+for l in non_green_labels:
+    plant_area[label_positions == l] = 255
 cv2.imwrite("label_plant.png", plant_area)

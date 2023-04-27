@@ -161,7 +161,7 @@ if not args.visualize:
     im_target = target.data.cpu().numpy()
     im_target_rgb = np.array([label_colours[c % args.nChannel] for c in im_target])
     im_target_rgb = im_target_rgb.reshape(im.shape).astype(np.uint8)
-# cv2.imwrite("output.png", im_target_rgb)
+cv2.imwrite("output.png", im_target_rgb)
 
 GREEN_LOWER = np.array([0, 150, 0])
 GREEN_UPPER = np.array([150, 255, 150])

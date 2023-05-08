@@ -11,6 +11,7 @@ import sys
 import numpy as np
 import torch.nn.init
 import random
+from scipy.ndimage import convolve
 
 use_cuda = torch.cuda.is_available()
 
@@ -33,7 +34,7 @@ parser.add_argument('--input', metavar='FILENAME',
                     help='input image file name', required=True)
 parser.add_argument('--stepsize_sim', metavar='SIM', default=1, type=float,
                     help='step size for similarity loss', required=False)
-parser.add_argument('--stepsize_con', metavar='CON', default=1, type=float, 
+parser.add_argument('--stepsize_con', metavar='CON', default=1.5, type=float, 
                     help='step size for continuity loss')
 parser.add_argument('--stepsize_scr', metavar='SCR', default=0.5, type=float, 
                     help='step size for scribble loss')
@@ -185,15 +186,29 @@ def find_plant(im, im_target):
         # else:
         #     mapped[x] = [255,255,255]
     # remove the classes with the lowest green percentage
-    sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
+    # sorted_percent_mapped = sorted(percent_mapped.items(), key=lambda kv: kv[1])
     # mapped[sorted_percent_mapped[0][0]] = [255,255,255]
-    print(sorted_percent_mapped)
+    # print(sorted_percent_mapped)
 
     im_target = target.data.cpu().numpy()
     im_target_rgb = np.array([mapped[c] if mapped[c] is not None else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])
+    process_image(im_target_rgb.reshape( im.shape ), im)
     im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
     cv2.imwrite( "output_plant.png", im_target_rgb )
 
+def process_image(image, im):
+    kernel = np.ones((10, 10))
+    binary_image = np.all(image == [255,255,255], axis=-1).astype(int)
+    convolved_image = convolve(binary_image, kernel)
+    white_pixels = np.argwhere(np.all(image == [255,255,255], axis=-1))
+    print("image", image.shape)
+    print("im", np.array([im])[0].shape)
+    for pixel in white_pixels:
+        row, col = pixel
+        if convolved_image[row, col] < np.sum(kernel):
+            image[row, col] = np.array([im])[0][row][col]
+
+    return image
 
 def process_green(img, count):
     green_mask = np.logical_and.reduce((

@@ -114,7 +114,7 @@ HPz_target = torch.zeros(im.shape[0], im.shape[1]-1, args.nChannel)
 if use_cuda:
     HPy_target = HPy_target.cuda()
     HPz_target = HPz_target.cuda()
-    
+
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
 label_colours = np.random.randint(255,size=(100,3))
 
@@ -144,7 +144,7 @@ for batch_idx in range(args.maxIter):
         loss = args.stepsize_sim * loss_fn(output[ inds_sim ], target[ inds_sim ]) + args.stepsize_scr * loss_fn_scr(output[ inds_scr ], target_scr[ inds_scr ]) + args.stepsize_con * (lhpy + lhpz)
     else:
         loss = args.stepsize_sim * loss_fn(output, target) + args.stepsize_con * (lhpy + lhpz)
-        
+
     loss.backward()
     optimizer.step()
 

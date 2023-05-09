@@ -93,12 +93,17 @@ def find_plant(im, im_target, target, img_name, model, data, label_colours):
             mapped[x] = False
         else:
             mapped[x] = True
-            mask = np.where(reshaped_im_target==x)
+            # mask = np.where(reshaped_im_target==x)
             # masked_image = image_data[mask[0], mask[1]]
+            print("mask[0]", mask[0])
+            print("mask[1]", mask[1])
+            print(im.shape)
             x1 = min(mask[0])
             y1 = min(mask[1])
             x2 = max(mask[0])
             y2 = max(mask[1])
+            if x1 == x2 or y1 == y2:
+              continue
             # crop this part
             cropped = im[y1:y2, x1:x2, :]
             cv2.imwrite(args.image_dst + img_name[:-4] + f"_{x}.jpg", cropped)
@@ -121,10 +126,6 @@ def process_green(img, count):
 def segment(input):
     # load image
     img_name = input.split("/")[-1]
-    # segment plant save path
-    # save_path = "sh_1k_data/segmented_plants/val2/" + img_name
-    # if os.path.exists(save_path):
-    #     return
     im = cv2.imread(input)
     data = torch.from_numpy( np.array([im.transpose( (2, 0, 1) ).astype('float32')/255.]) ) 
     if use_cuda:

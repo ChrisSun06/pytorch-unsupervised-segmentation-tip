@@ -85,6 +85,7 @@ def find_plant(im, im_target, target, img_name, model, data, label_colours):
     # percent_mapped = {} # map from label to green percentage
     labels = np.unique(im_target)
     # all_white = True
+    coords = []
     for x in labels:
         mask = np.where(reshaped_im_target==x)
         masked_image = image_data[mask[0], mask[1]]
@@ -95,19 +96,43 @@ def find_plant(im, im_target, target, img_name, model, data, label_colours):
             mapped[x] = True
             # mask = np.where(reshaped_im_target==x)
             # masked_image = image_data[mask[0], mask[1]]
-            print("mask[0]", mask[0])
-            print("mask[1]", mask[1])
-            print(im.shape)
             x1 = min(mask[0])
             y1 = min(mask[1])
             x2 = max(mask[0])
             y2 = max(mask[1])
             if x1 == x2 or y1 == y2:
               continue
+            coords.append((x1, y1, x2, y2, x))
             # crop this part
             cropped = im[y1:y2, x1:x2, :]
-            cv2.imwrite(args.image_dst + img_name[:-4] + f"_{x}.jpg", cropped)
+            if cropped.shape[0] == 0 or cropped.shape[1] == 0:
+                continue
+            cv2.imwrite(args.image_dst + "org_" + img_name[:-4] + f"_{x}.jpg", cropped)
+            # after crop, set the non-plant area to white pixels
 
+    im_target_rgb = np.array([[255,255,255] if mapped[c] is False else np.array(reshaped_image_data[i]) for i,c in enumerate(im_target)])
+    processed = process_image(im_target_rgb.reshape( im.shape ), im)
+    # im_target_rgb = im_target_rgb.reshape( im.shape ).astype( np.uint8 )
+    print(processed.shape)
+    for coord in coords:
+        x1, y1, x2, y2, x = coord
+        cropped = processed[y1:y2, x1:x2, :]
+        print(f"{coord} vs {cropped.shape}")
+        cv2.imwrite(args.image_dst + "whiten_" + img_name[:-4] + f"_{x}.jpg", cropped)
+
+
+def process_image(image, im):
+    kernel = np.ones((10, 10))
+    binary_image = np.all(image == [255,255,255], axis=-1).astype(int)
+    convolved_image = convolve(binary_image, kernel)
+    white_pixels = np.argwhere(np.all(image == [255,255,255], axis=-1))
+
+    for pixel in white_pixels:
+        row, col = pixel
+        if convolved_image[row, col] < np.sum(kernel):
+            image[row, col] = np.array([im])[0][row][col]
+
+    return image.astype( np.uint8 )
         
 def process_green(img, count):
     green_mask = np.logical_and.reduce((
